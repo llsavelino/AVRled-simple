@@ -16,23 +16,18 @@ ISR(TIMER2_OVF_vect) {
     case true:
       TCNT2 = pwm0;                     // Reinicia o timer com valor pwm0
       HIGST(PB4, 0x01, PORTB);          // Seta o pino PB4 (HIGH)
-      state = false; 
-      break;
+      state = false; break;
     case false:
       TCNT2 = 0xFF - pwm0;              // Reinicia o timer com valor complementar
       LOWST(PB4, 0x01, PORTB);          // Limpa o pino PB4 (LOW)
-      state = true; 
-      break;
-  }
-  while (0x00) {  __asmFunc();  }
+      state = true; break;
+  } while (0x00) {  __asmFunc();  }
 }
 
 // Função de configuração inicial
 void setup() {
-  // Configura o pino PB4 como saída
-  OUTIN(PB4, 0x01, DDRB); 
-  // Garante que o pino PB4 comece em LOW
-  LOWST(PB4, 0x01, PORTB);
+  // Configura o pino PB4 como saída, Garante que o pino PB4 comece em LOW
+  OUTIN(PB4, 0x01, DDRB); LOWST(PB4, 0x01, PORTB);
 
   // Configura o Timer2:
   TCCR2A = 0x00;  // Modo normal (sem comparação, sem PWM hardware)
@@ -47,10 +42,9 @@ void setup() {
   // TCCR2B = 0x05; // Prescaler 128
   // TCCR2B = 0x06; // Prescaler 256
   // TCCR2B = 0x07; // Prescaler 1024
-
+  
   // Habilita interrupção por overflow do Timer2
   TIMSK2 = 0x01;
 }
 
-// Loop principal (vazio, toda a lógica é feita na interrupção)
-void loop() {  }
+/* Loop principal (vazio, toda a lógica é feita na interrupção) */ void loop() {  }
