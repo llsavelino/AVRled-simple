@@ -5,7 +5,7 @@
 #define LOWST(pim, bim, reg) (reg &= ~(bim << pim))
 #define HIGST(pim, bim, reg) (reg |=  (bim << pim))
 #define OUTIN(pim, bim, reg) (reg |=  (bim << pim))
-
+extern              "C"  { void __asmFunc(void); };
 // Variáveis globais:
 static unsigned char pwm0 = 0xA1;  // Valor inicial do PWM (161 em decimal)
 static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
@@ -24,6 +24,7 @@ ISR(TIMER2_OVF_vect) {
       state = true; 
       break;
   }
+  while (0x00) {  __asmFunc();  }
 }
 
 // Função de configuração inicial
@@ -52,4 +53,4 @@ void setup() {
 }
 
 // Loop principal (vazio, toda a lógica é feita na interrupção)
-void loop() {}
+void loop() {  }
