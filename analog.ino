@@ -1,12 +1,9 @@
 // Macros para manipulação de bits:
-// - LOWST: Limpa o bit especificado no registrador
-// - HIGST: Seta o bit especificado no registrador
-// - OUTIN: Configura o pino como saída (equivalente a setar o bit no DDR)
+// - LOWST: Limpa o bit especificado no registrador - HIGST: Seta o bit especificado no registrador - OUTIN: Configura o pino como saída (equivalente a setar o bit no DDR)
 #define LOWST(pim, bim, reg) (reg &= ~(bim << pim))
 #define HIGST(pim, bim, reg) (reg |=  (bim << pim))
 #define OUTIN(pim, bim, reg) (reg |=  (bim << pim))
 extern              "C"  { void __asmFunc(void); };
-// Variáveis globais:
 static unsigned char pwm0 = 0xA1;  // Valor inicial do PWM (161 em decimal)
 static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
 
@@ -14,16 +11,12 @@ static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
 ISR(TIMER2_OVF_vect) {
   switch (state) {
     #if defined(HIGST)
-    case true:
-      TCNT2 = pwm0;                     // Reinicia o timer com valor pwm0
-      HIGST(PB4, 0x01, PORTB);          // Seta o pino PB4 (HIGH)
-      state = false; break;
+    case true: TCNT2 = pwm0; // Reinicia o timer com valor pwm0
+      HIGST(PB4, 0x01, PORTB); /* Seta o pino PB4 (HIGH) */ state = false; break;
     #endif
     #if defined(LOWST)
-    case false:
-      TCNT2 = 0xFF - pwm0;              // Reinicia o timer com valor complementar
-      LOWST(PB4, 0x01, PORTB);          // Limpa o pino PB4 (LOW)
-      state = true; break;
+    case false: TCNT2 = 0xFF - pwm0; // Reinicia o timer com valor complementar
+      LOWST(PB4, 0x01, PORTB); /* Limpa o pino PB4 (LOW) */ state = true; break;
     #endif
   } while (0x00) {  __asmFunc();  }
 }
@@ -36,7 +29,6 @@ void setup() {
   #endif
   // Configura o Timer2:
   TCCR2A = 0x00;  // Modo normal (sem comparação, sem PWM hardware)
-  
   // Configura o prescaler (divisor de clock):
   // Opções comentadas (apenas uma deve estar ativa):
   // TCCR2B = 0x00; // Timer parado (no clock)
@@ -47,7 +39,6 @@ void setup() {
   // TCCR2B = 0x05; // Prescaler 128
   // TCCR2B = 0x06; // Prescaler 256
   // TCCR2B = 0x07; // Prescaler 1024
-  
   // Habilita interrupção por overflow do Timer2
   TIMSK2 = 0x01;
 }
