@@ -13,22 +13,27 @@ static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
 // Rotina de Interrupção do Timer2 (Overflow)
 ISR(TIMER2_OVF_vect) {
   switch (state) {
+    #if defined(HIGST)
     case true:
       TCNT2 = pwm0;                     // Reinicia o timer com valor pwm0
       HIGST(PB4, 0x01, PORTB);          // Seta o pino PB4 (HIGH)
       state = false; break;
+    #endif
+    #if defined(LOWST)
     case false:
       TCNT2 = 0xFF - pwm0;              // Reinicia o timer com valor complementar
       LOWST(PB4, 0x01, PORTB);          // Limpa o pino PB4 (LOW)
       state = true; break;
+    #endif
   } while (0x00) {  __asmFunc();  }
 }
 
-// Função de configuração inicial
 void setup() {
-  // Configura o pino PB4 como saída, Garante que o pino PB4 comece em LOW
+  #if defined(OUTIN) && defined(LOWST)
   OUTIN(PB4, 0x01, DDRB); LOWST(PB4, 0x01, PORTB);
-
+  #else
+    #pragma message "Erro: Macro não definida.\n"
+  #endif
   // Configura o Timer2:
   TCCR2A = 0x00;  // Modo normal (sem comparação, sem PWM hardware)
   
