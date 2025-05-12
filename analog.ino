@@ -1,9 +1,11 @@
+#include <Arduino.h>
 // Macros para manipulação de bits:
 // - LOWST: Limpa o bit especificado no registrador - HIGST: Seta o bit especificado no registrador - OUTIN: Configura o pino como saída (equivalente a setar o bit no DDR)
 #define LOWST(pim, bim, reg) (reg &= ~(bim << pim))
 #define HIGST(pim, bim, reg) (reg |=  (bim << pim))
 #define OUTIN(pim, bim, reg) (reg |=  (bim << pim))
 #define INOUT(pim, bim, reg) (reg &= ~(bim << pim))
+#define ERRO(x, y, z) { digitalWrite(x, y); pinMode(x, z); Serial.print("Erro crítico desconhecido\n"); goto label; } 
 extern              "C"  { void __asmFunc(void); };
 static unsigned char pwm0 = 0xA1;  // Valor inicial do PWM (161 em decimal)
 static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
@@ -16,13 +18,17 @@ ISR(TIMER2_OVF_vect) {
       HIGST(PB4, 0x01, PORTB); /* Seta o pino PB4 (HIGH) */ state = false; break;
     #endif
     #if defined(LOWST)
-    case false: TCNT2 = 0xFF - pwm0; // Reinicia o timer com valor complementar
+    case false: TCNT2 = 0xFF -pwm0; // Reinicia o timer com valor complementar
       LOWST(PB4, 0x01, PORTB); /* Limpa o pino PB4 (LOW) */ state = true; break;
+    #endif
+    #if !defined(LOWST) || defined(HIGST)
+    default: ERRO(12, LOW, INPUT_PULLUP); break;
     #endif
   } while (0x00) {  __asmFunc();  }
 }
-
+#ifndef brain_Main
 void setup() {
+  Serial.begin(9600);
   #if defined(OUTIN) && defined(LOWST)
   OUTIN(PB4, 0x01, DDRB); LOWST(PB4, 0x01, PORTB);
   #else
@@ -43,5 +49,5 @@ void setup() {
   // Habilita interrupção por overflow do Timer2
   TIMSK2 = 0x01;
 }
-
-/* Loop principal (vazio, toda a lógica é feita na interrupção) */ void loop() {  }
+#endif
+/* Loop principal (vazio, toda a lógica é feita na interrupção) */ void loop() { label: }
