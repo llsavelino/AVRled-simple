@@ -3,6 +3,7 @@
 #define LOWST(pim, bim, reg) (reg &= ~(bim << pim))
 #define HIGST(pim, bim, reg) (reg |=  (bim << pim))
 #define OUTIN(pim, bim, reg) (reg |=  (bim << pim))
+#define INOUT(pim, bim, reg) (reg &= ~(bim << pim))
 extern              "C"  { void __asmFunc(void); };
 static unsigned char pwm0 = 0xA1;  // Valor inicial do PWM (161 em decimal)
 static bool state = 0x00;          // Estado atual do PWM (0 = baixo, 1 = alto)
